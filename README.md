@@ -16,6 +16,9 @@ The actual implementation of the $n$-TangentProp algorithm is contained in `ntp/
 1. Navigate to the project directory and run `conda env create -f environment.yml` to create a new conda environment.
 1. Run `conda activate ntangentprop` to activate the new environment.
 1. Run `python setup.py install` to install the `ntp` package in your Conda environment. 
+
+Before running experiments you will need to install the L-BFGS code that we use to run the profile experiments [from this repo](https://github.com/hjmshi/PyTorch-LBFGS). Then replace the import path at the top of `experiments/profiles.py` with the path to the installed library on your machine.
+
 1. Run the experiments using `./run_experiments.sh`. You can modify the Python files that this shell script calls to adjust the experiment parameters. As they are currently set up these take about 7 hours on an A6000 GPU.
 1. Generate the figures by modifying `generate_figs.py` to point to the output from the experiments you just ran. Then simply run `python generate_figs.py` to populate the `figs/` directory. By default `generate_figs.py` points to the runs that I did, which are stored in `results/`.
 
