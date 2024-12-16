@@ -1,7 +1,7 @@
 # $n$-TangentProp
 $n$-TangentProp (NTP) is a method for computing $\frac{d^n}{dx^n}u(x)$ of a neural network $u$. This is traditionally done using autodiff, which has a runtime of $\mathcal{O}(M^n)$, where $M$ is the number of parameters in the neural network $u$. NTP does this computation in linear time $\mathcal{O}(nM)$ instead.
 
-We have released a [paper on using NTP]() where we demonstrate significant training time reductions when training PINNs. NTP is based on the [TangentProp paper](https://proceedings.neurips.cc/paper/1991/hash/65658fde58ab3c2b6e5132a39fae7cb9-Abstract.html) by Simard, Victorri, LeCun, and Denker.
+We have released a [paper on using NTP](https://arxiv.org/abs/2412.09752) where we demonstrate significant training time reductions when training PINNs. NTP is based on the [TangentProp paper](https://proceedings.neurips.cc/paper/1991/hash/65658fde58ab3c2b6e5132a39fae7cb9-Abstract.html) by Simard, Victorri, LeCun, and Denker.
 
 The actual implementation of the $n$-TangentProp algorithm is contained in `ntp/models:DenseNet.forward` and calls relevant helper functions. The experiments can be found in `experiments/` and the relevant sub-directories.
 
