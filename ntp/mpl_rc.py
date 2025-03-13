@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 def update_rcParams():
     plt.rcParams.update({
         'font.family': 'serif',
-        'font.serif': ['Times New Roman'],
+        'font.serif': ['FreeSerif'],
         'font.size': 12,
         'axes.titlesize': 14,
         'axes.labelsize': 12,

@@ -16,7 +16,7 @@ def plot_forward_backward(data: dict, key: str, save_path: str):
     ntp_times = [sum(data[i][key]['ntp']) / len(data[i][key]['ntp']) for i in x_data]
     ad_times = [sum(data[i][key]['ad']) / len(data[i][key]['ad']) for i in x_data]
 
-    fig, axs = plt.subplots(2, 1, figsize=(8, 8))
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
     for ax in axs:
         ax.plot(x_data, ntp_times, label='$n$-TangentProp', marker='*', markeredgecolor='black', markersize=15, linestyle='-', c='b')
@@ -25,6 +25,7 @@ def plot_forward_backward(data: dict, key: str, save_path: str):
     axs[1].set_yscale('log')
     axs[0].set_ylabel("Average Runtime")
     axs[0].set_ylabel("Average Runtime (log Scale)")
+    axs[0].set_xlabel("Number of Derivatives")
     axs[1].set_xlabel("Number of Derivatives")
     axs[0].legend()
     axs[1].legend()
@@ -57,10 +58,11 @@ def plot_full_explore(data: dict, key: str, save_path: str):
     sorted_depths = sorted(list(depths))
     sorted_derivs = sorted(list(derivs))
 
-    fig, axs = plt.subplots(4, 3, figsize=(8, 12), dpi=300)
+    fig, axs = plt.subplots(3, 4, figsize=(12, 8), dpi=300)
 
-    for j, g in enumerate(grid):
-        for i, gg in enumerate(g):
+    for i, d in enumerate(sorted_depths):
+        for j, der in enumerate(sorted_derivs):
+            gg = grid[i][j]
             gg = {k: v for k, v in sorted(gg.items(), key=lambda x: x[0])}
             for bs, plot_data in gg.items():
                 if bs != 64 and bs != 256:
@@ -70,21 +72,20 @@ def plot_full_explore(data: dict, key: str, save_path: str):
 
                     y = [ad / ntp for ad, ntp in zip(y_ad, y_ntp)]
 
-                    # sort x and y according to x
                     x, y = zip(*sorted(zip(x, y)))
 
-                    axs[i][j].plot(x, y, label=f'bs={bs}', marker='*',  markeredgecolor='black', markersize=8)
-                    if i == 0:
-                        axs[i][j].set_title(f'Depth {sorted_depths[j]}')
-                    if i == 3:
-                        axs[i][j].set_xlabel('Width')
+                    axs[i][j].plot(x, y, label=f'bs={bs}', marker='*', markeredgecolor='black', markersize=8)
+                    
                     if j == 0:
-                        axs[i][j].set_ylabel('ad / ntp Ratio')
-                        axs[i][j].text(-0.5, 0.5, f'{sorted_derivs[i]} Derivatives', fontsize=15, ha='right', va='center', transform=axs[i][j].transAxes, rotation=65)
+                        axs[i][j].set_ylabel(f'Depth {sorted_depths[i]}')
+                    if i == 2:
+                        axs[i][j].set_xlabel(f'ad / ntp Ratio')
+                    if i == 0:
+                        axs[i][j].set_title(f'{sorted_derivs[j]} Derivatives')
 
-                    if i == 0 or i == 1:
+                    if j == 0 or j == 1:
                         axs[i][j].set_ylim([0., 2.5])
-                    elif i == 2:
+                    elif j == 2:
                         axs[i][j].set_ylim([0., 5.])
                     else:
                         axs[i][j].set_ylim([0., 20.])
@@ -107,7 +108,7 @@ def plot_profile(
     profile_name: str,
 ):
     n_derivs = len(sol)
-    n_rows = n_derivs // 2 + 2
+    n_rows = 3
 
     Uderivs = compute_exact_implicit(
         torch.linspace(-1, 1, 100).reshape(-1, 1),
@@ -121,18 +122,29 @@ def plot_profile(
     Uderivs = Uderivs[1:]
     x = torch.linspace(-2., 2., sol[0].shape[0])
 
-    fig = plt.figure(figsize=(10, 3 * n_rows))
-    gs = gridspec.GridSpec(n_rows, 2, height_ratios=([2/3] * (n_rows - 2)) + [1, 1])
+    fig = plt.figure(figsize=(12, 5))
 
-    axs = []
-    row = 0
-    for _ in range(n_rows - 2):
-        axs.append(fig.add_subplot(gs[row, 0]))
-        axs.append(fig.add_subplot(gs[row, 1]))
-        row += 1
+    if n_derivs <= 4:
+        gs = gridspec.GridSpec(2, n_derivs, height_ratios=[1, 1])
 
-    axs.append(fig.add_subplot(gs[-2, :]))
-    axs.append(fig.add_subplot(gs[-1, :]))
+        axs = []
+        for i in range(n_derivs):
+            axs.append(fig.add_subplot(gs[0, i]))
+
+        axs.append(fig.add_subplot(gs[-1, :2]))
+        axs.append(fig.add_subplot(gs[-1, 2:]))
+
+    else:
+        gs = gridspec.GridSpec(n_rows, n_derivs // 2, height_ratios=[1, 1, 1])
+
+        axs = []
+        for row in range(2):
+            for i in range(n_derivs // 2):
+                axs.append(fig.add_subplot(gs[row, i]))
+
+        axs.append(fig.add_subplot(gs[-1, :n_derivs // 4]))
+        axs.append(fig.add_subplot(gs[-1, n_derivs // 4:]))
+
 
     deriv_names = [
         'Profile', 'First Derivative', 'Second Derivative', 'Third Derivative',
